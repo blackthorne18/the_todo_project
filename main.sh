@@ -101,6 +101,10 @@ function listfile(){
     fname2=$1
     farr=()
     farn=0
+    IFS='/' read -ra ADDR <<< "$fname"
+    IFS='.' read -ra ADDR2 <<< "${ADDR[$((${#ADDR[@]}-1))]}"
+    thisbranch="${ADDR2[0]}"
+    echo "Notes in $thisbranch"
     while read -r line
     do
         farr[farn]="$line"
@@ -113,7 +117,7 @@ function listfile(){
     
     if [ "${#farr[@]}" -eq "0" ]
     then
-        echo "[$fname2 notes empty]"
+        echo "[$thisbranch notes empty]"
     fi
     
 }
@@ -129,7 +133,7 @@ function inabranch(){
     IFS='/' read -ra ADDR <<< "$fname"
     IFS='.' read -ra ADDR2 <<< "${ADDR[$((${#ADDR[@]}-1))]}"
     thisbranch="${ADDR2[0]}"
-    echo "Notes in $thisbranch"
+    
     key=0
     if [ $argnam ]
     then
@@ -150,20 +154,38 @@ function inabranch(){
             echo "$argpar" >> $fname
         elif [ "$argnam" = "del" ]
         then
-            if [ "$argpar" = "all" ]
+            if [ "$argpar" = "" ]
+            then
+                echo "Nothing to delete"
+            elif [ "$argpar" = "all" ]    
             then
                 echo "[$thisbranch notes modified: erased]"
                 > $fname
             else
-                echo "[$thisbranch notes modified: deletion]"
-                > $fname
-                for t in ${!arr[@]}; do
-                    if [ "$t" -ne "$argpar" ]
+                re='^[0-9]+$'
+                if ! [[ $argpar =~ $re ]]
+                then
+                   echo "error: Not a number" >&2; exit 1
+                else
+                    > $fname
+                    keys=0
+                    for t in ${!arr[@]}; do
+                        if [ "$t" -eq "$argpar" ]
+                        then
+                            keys=1
+                        fi
+                        if [ "$t" -ne "$argpar" ]
+                        then
+                            echo ${arr[$t]} >> $fname
+                        fi
+                    done
+                    if [ "$keys" -eq "1" ]
                     then
-                        echo ${arr[$t]} >> $fname
+                        echo "[$thisbranch notes modified: deletion]"
+                    else
+                        echo "Nothing deleted"
                     fi
-                done
-                #echo ${arr[@]}
+                fi
             fi
         fi
     fi
