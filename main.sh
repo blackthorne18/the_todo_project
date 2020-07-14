@@ -214,24 +214,7 @@ then
     ready_timer
 elif [ "$1" = "help" ]
 then
-    echo "Manual:
-alias todo=path+\"/main.sh\"
-
-Commands
-> todo timer
-can set a timer that runs and reminds you after set time
-> todo new <branch-name>
-creates new branch
-> todo rm <branch-name>
-deletes an existing branch
-> todo ls
-lists all branches (1 repesents active branch)
-> todo
-lists notes in active branch
-> todo add \"notes\"
-adds notes to current branch
-> todo del <num>
-deletes notes in current branch at <num>"
+    cat ./README
 elif [ "$1" = "cd" ]
 then
     if [ "$2" = "$(getbranch 0)" ]
