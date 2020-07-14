@@ -16,3 +16,7 @@ lists notes in active branch
 adds notes to current branch
 > todo del <num>
 deletes notes in current branch at <num>
+
+Colour Scheme:
+Can be edited by changing the setaf values in the first 15 lines of main.sh
+The number has to be between 1 and 256.

@@ -2,6 +2,13 @@
 
 path="/Users/prajwalbharadwaj/Desktop/shellproject/"
 
+rare_heading=$(tput setaf 202);
+only_message_output=$(tput setaf 33);
+passive_output=$(tput setaf 248);
+text_heading=$(tput setaf 29);
+dashes=$(tput setaf 15);
+error_message=$(tput setaf 52);
+
 function getbranch(){
     wo=$1
     bls=[]
@@ -49,7 +56,7 @@ function switchbranch(){
         fi
     done
     
-    echo "Switched to branch $whichto"
+    echo "${only_message_output}Switched to branch $whichto${dashes}"
 }
 
 function editbranches(){
@@ -69,7 +76,7 @@ function editbranches(){
             echo ${bls[$t]} >> $fname1
         done
         touch $path"$2.txt"
-        echo "New branch created: $2"
+        echo "${only_message_output}New branch created: $2${dashes}"
     elif [ "$key" = "1" ]
     then
         fname1=$path"branches.txt"
@@ -93,7 +100,7 @@ function editbranches(){
             fi
         done
         rm $path"$2.txt"
-        echo "Branch removed: $2"
+        echo "${only_message_output}Branch removed: $2${dashes}"
     fi
 }
 
@@ -104,7 +111,9 @@ function listfile(){
     IFS='/' read -ra ADDR <<< "$fname"
     IFS='.' read -ra ADDR2 <<< "${ADDR[$((${#ADDR[@]}-1))]}"
     thisbranch="${ADDR2[0]}"
-    echo "Notes in $thisbranch"
+    echo "${dashes}-------------------------------------------------${dashes}"
+    echo "${text_heading}Notes in $thisbranch${dashes}"
+    echo ""
     while read -r line
     do
         farr[farn]="$line"
@@ -119,7 +128,8 @@ function listfile(){
     then
         echo "[$thisbranch notes empty]"
     fi
-    
+    echo ""
+    echo "${dashes}-------------------------------------------------${dashes}"
 }
 
 function inabranch(){
@@ -150,7 +160,7 @@ function inabranch(){
     then
         if [ "$argnam" = "add" ]
         then
-            echo "[$thisbranch notes modified: addition]"
+            echo "${only_message_output}[$thisbranch notes modified: addition]${dashes}"
             echo "$argpar" >> $fname
         elif [ "$argnam" = "del" ]
         then
@@ -159,13 +169,13 @@ function inabranch(){
                 echo "Nothing to delete"
             elif [ "$argpar" = "all" ]    
             then
-                echo "[$thisbranch notes modified: erased]"
+                echo "${only_message_output}[$thisbranch notes modified: erased]${dashes}"
                 > $fname
             else
                 re='^[0-9]+$'
                 if ! [[ $argpar =~ $re ]]
                 then
-                   echo "error: Not a number" >&2; exit 1
+                   echo "${error_message}error: Not a number${dashes}" >&2; exit 1
                 else
                     > $fname
                     keys=0
@@ -181,9 +191,9 @@ function inabranch(){
                     done
                     if [ "$keys" -eq "1" ]
                     then
-                        echo "[$thisbranch notes modified: deletion]"
+                        echo "${only_message_output}[$thisbranch notes modified: deletion]${dashes}"
                     else
-                        echo "Nothing deleted"
+                        echo "${only_message_output}Nothing deleted${dashes}"
                     fi
                 fi
             fi
@@ -210,15 +220,15 @@ function ready_timer(){
     do
         temp=$(($tim - $x))
         clear
-        echo "-------------------------------------------------"
+        echo "${dashes}-------------------------------------------------${dashes}"
         echo "Timer Ongoing"
         echo ""
-        echo $message
+        echo "${rare_heading}$message${dashes}"
         
         echo ""
-        echo "You have $(($temp/60))m$(($temp%60))s time left to finish your task"
+        echo "${dashes}You have ${text_heading}$(($temp/60))m$(($temp%60))s${dashes} time left to finish your task"
         echo ""
-        echo "-------------------------------------------------"
+        echo "${dashes}-------------------------------------------------${dashes}"
         sleep 1
         x=$(($x + 1))
     done
@@ -235,7 +245,7 @@ function main_argcheck(){
     
     if [ "$1" = "ls" ]
     then
-        echo $branches
+        echo "${text_heading}$(getbranch 1)${dashes}"
     elif [ "$1" = "timer" ]
     then
         ready_timer
@@ -246,8 +256,8 @@ function main_argcheck(){
     then
         if [ "$2" = "$(getbranch 0)" ]
         then
-            echo "You are already in $2"
-            echo $(getbranch 1)
+            echo "${only_message_output}You are already in $2${dashes}"
+            echo "${text_heading}$(getbranch 1)${dashes}"
         else
             key=0
             for t in ${!branchlist[@]}; do
@@ -261,8 +271,8 @@ function main_argcheck(){
                 switchbranch $2
                 echo $(getbranch 1)
             else
-                echo "Branch doesnt exist. Existing branches are:"
-                echo $(getbranch 1)
+                echo "${error_message}Branch doesnt exist. ${dashes}Existing branches are:"
+                echo "${text_heading}$(getbranch 1)${dashes}"
             fi
         fi
     elif [ "$1" = "new" ]
@@ -276,8 +286,8 @@ function main_argcheck(){
         done
         if [ "$key" = "1" ]
         then
-            echo "Branch $2 already exists"
-            echo $(getbranch 1)
+            echo "${error_message}Branch $2 already exists${dashes}"
+            echo "${text_heading}$(getbranch 1)${dashes}"
         else
             editbranches 0 $2
         fi
@@ -294,14 +304,14 @@ function main_argcheck(){
         then
             if [ "$2" = "master" ]
             then
-                echo "Cannot remove master branch"
-                echo $(getbranch 1)
+                echo "${error_message}Cannot remove master branch${dashes}"
+                echo "${text_heading}$(getbranch 1)${dashes}"
             else
                 editbranches 1 $2
             fi
         else
-            echo "Branch $2 doesnt exists"
-            echo $(getbranch 1)
+            echo "${error_message}Branch $2 doesnt exists${dashes}"
+            echo "${text_heading}$(getbranch 1)${dashes}"
         fi
     elif [ "$1" = "" ] || [ "$1" = "add" ] || [ "$1" = "del" ]
     then
