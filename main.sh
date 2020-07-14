@@ -183,13 +183,14 @@ function ready_timer(){
     x=0
     while [ "$x" -le "$tim" ]
     do
+        temp=$(($tim - $x))
         clear
-        #tls=$(())
         echo "-------------------------------------------------"
         echo "Timer Ongoing"
         echo ""
         echo $message
-        temp=$(($tim - $x))
+        
+        echo ""
         echo "You have $(($temp/60))m$(($temp%60))s time left to finish your task"
         echo ""
         echo "-------------------------------------------------"
@@ -203,25 +204,44 @@ function ready_timer(){
     printf \\a
 }
 
-branches=$(getbranch 1)
-IFS=' ' read -ra branchlist <<< "$branches"
-
-if [ "$1" = "ls" ]
-then
-    echo $branches
-elif [ "$1" = "timer" ]
-then
-    ready_timer
-elif [ "$1" = "help" ]
-then
-    cat ./README
-elif [ "$1" = "cd" ]
-then
-    if [ "$2" = "$(getbranch 0)" ]
+function main_argcheck(){
+    branches=$(getbranch 1)
+    IFS=' ' read -ra branchlist <<< "$branches"
+    
+    if [ "$1" = "ls" ]
     then
-        echo "You are already in $2"
-        echo $(getbranch 1)
-    else
+        echo $branches
+    elif [ "$1" = "timer" ]
+    then
+        ready_timer
+    elif [ "$1" = "help" ]
+    then
+        cat ./README
+    elif [ "$1" = "cd" ]
+    then
+        if [ "$2" = "$(getbranch 0)" ]
+        then
+            echo "You are already in $2"
+            echo $(getbranch 1)
+        else
+            key=0
+            for t in ${!branchlist[@]}; do
+                if [ "${branchlist[$t]}" = "$2" ]
+                then
+                    key=1
+                fi
+            done
+            if [ "$key" = "1" ]
+            then
+                switchbranch $2
+                echo $(getbranch 1)
+            else
+                echo "Branch doesnt exist. Existing branches are:"
+                echo $(getbranch 1)
+            fi
+        fi
+    elif [ "$1" = "new" ]
+    then
         key=0
         for t in ${!branchlist[@]}; do
             if [ "${branchlist[$t]}" = "$2" ]
@@ -231,53 +251,38 @@ then
         done
         if [ "$key" = "1" ]
         then
-            switchbranch $2
+            echo "Branch $2 already exists"
             echo $(getbranch 1)
         else
-            echo "Branch doesnt exist. Existing branches are:"
-            echo $(getbranch 1)
+            editbranches 0 $2
         fi
-    fi
-elif [ "$1" = "new" ]
-then
-    key=0
-    for t in ${!branchlist[@]}; do
-        if [ "${branchlist[$t]}" = "$2" ]
-        then
-            key=1
-        fi
-    done
-    if [ "$key" = "1" ]
+    elif [ "$1" = "rm" ]
     then
-        echo "Branch $2 already exists"
-        echo $(getbranch 1)
-    else
-        editbranches 0 $2
-    fi
-elif [ "$1" = "rm" ]
-then
-    key=0
-    for t in ${!branchlist[@]}; do
-        if [ "${branchlist[$t]}" = "$2" ]
+        key=0
+        for t in ${!branchlist[@]}; do
+            if [ "${branchlist[$t]}" = "$2" ]
+            then
+                key=1
+            fi
+        done
+        if [ "$key" = "1" ]
         then
-            key=1
-        fi
-    done
-    if [ "$key" = "1" ]
-    then
-        if [ "$2" = "master" ]
-        then
-            echo "Cannot remove master branch"
-            echo $(getbranch 1)
+            if [ "$2" = "master" ]
+            then
+                echo "Cannot remove master branch"
+                echo $(getbranch 1)
+            else
+                editbranches 1 $2
+            fi
         else
-            editbranches 1 $2
+            echo "Branch $2 doesnt exists"
+            echo $(getbranch 1)
         fi
-    else
-        echo "Branch $2 doesnt exists"
-        echo $(getbranch 1)
+    elif [ "$1" = "" ] || [ "$1" = "add" ] || [ "$1" = "del" ]
+    then
+        curr=$(getbranch 0)
+        inabranch "$curr.txt" "$1" "$2"
     fi
-elif [ "$1" = "" ] || [ "$1" = "add" ] || [ "$1" = "del" ]
-then
-    curr=$(getbranch 0)
-    inabranch "$curr.txt" "$1" "$2"
-fi
+}
+
+main_argcheck "$1" "$2" "$3"
