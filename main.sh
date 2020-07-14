@@ -1,6 +1,14 @@
 #! /bin/bash
 
-path="/Users/prajwalbharadwaj/Desktop/shellproject/"
+path="<insert the path where you are storing the folder>/todoproject/"
+
+if [ -d $path ]
+then
+    kos=1
+else
+    echo "Path incorrect"
+    exit 1
+fi
 
 rare_heading=$(tput setaf 202);
 only_message_output=$(tput setaf 33);
