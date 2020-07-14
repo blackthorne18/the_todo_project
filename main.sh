@@ -9,12 +9,58 @@ text_heading=$(tput setaf 29);
 dashes=$(tput setaf 15);
 error_message=$(tput setaf 52);
 
+function checker(){
+    arr=(branches.txt master.txt)
+    for t in ${!arr[@]}
+    do
+        if [ -e "$path${arr[$t]}" ]
+        then
+            continue
+        else
+            touch $path${arr[$t]}
+            if [ "${arr[$t]}" = "branches.txt" ]
+            then
+                echo "master 1" > $path${arr[$t]}
+            fi
+        fi
+    done
+}
+
+function backup(){
+    echo "${rare_heading}Any archives if existing will be overwritten. Proceed? [y/n]${dashes}"
+    read
+    ans=$REPLY
+    if [ "$ans" = "y" ] || [ "$ans" = "Y" ]
+    then
+        echo "${only_message_output}Making Backup${dashes}"
+    else
+        echo "${passive_output}Exited${dashes}"
+        exit 1
+    fi
+    
+    if [ -d $path"archives" ]
+    then
+        key=0
+    else
+        mkdir $path"archives"
+    fi
+    
+    for t in ${!branchlist[@]}
+        do
+            if [ "${#branchlist[$t]}" -ge "3" ]
+            then
+                cp $path${branchlist[$t]}.txt $path"archives"
+            fi
+        done
+    
+    echo ${only_message_output}Exported to: $path"archives" ${dashes}
+}
+
 function getbranch(){
     wo=$1
     bls=[]
     bln=0
     fname1=$path"branches.txt"
-    fname2=$path"list1.txt"
     
     while read -r line
     do
@@ -64,6 +110,11 @@ function editbranches(){
     name=$2
     if [ "$key" = "0" ]
     then
+        if [ "${#name}" -le "2" ]
+        then
+            echo "${error_message}Branch name should be atleast 3 charachters${dashes}"
+            exit 1
+        fi
         fname1=$path"branches.txt"
         while read -r line
         do
@@ -79,6 +130,17 @@ function editbranches(){
         echo "${only_message_output}New branch created: $2${dashes}"
     elif [ "$key" = "1" ]
     then
+        echo "${rare_heading}Deleting branch $name. Proceed? [y/n]${dashes}"
+        read
+        ans=$REPLY
+        if [ "$ans" = "y" ] || [ "$ans" = "Y" ]
+        then
+            kas=1
+        else
+            echo "${passive_output}Exited${dashes}"
+            exit 1
+        fi
+    
         fname1=$path"branches.txt"
         while read -r line
         do
@@ -108,7 +170,7 @@ function listfile(){
     fname2=$1
     farr=()
     farn=0
-    IFS='/' read -ra ADDR <<< "$fname"
+    IFS='/' read -ra ADDR <<< "$fname2"
     IFS='.' read -ra ADDR2 <<< "${ADDR[$((${#ADDR[@]}-1))]}"
     thisbranch="${ADDR2[0]}"
     echo "${dashes}-------------------------------------------------${dashes}"
@@ -246,6 +308,18 @@ function main_argcheck(){
     if [ "$1" = "ls" ]
     then
         echo "${text_heading}$(getbranch 1)${dashes}"
+    elif [ "$1" = "all" ]
+    then
+        for t in ${!branchlist[@]}
+        do
+            if [ "${#branchlist[$t]}" -ge "3" ]
+            then
+                listfile $path${branchlist[$t]}.txt
+            fi
+        done
+    elif [ "$1" = "backup" ]
+    then
+        backup
     elif [ "$1" = "timer" ]
     then
         ready_timer
@@ -320,4 +394,5 @@ function main_argcheck(){
     fi
 }
 
+checker
 main_argcheck "$1" "$2" "$3"
