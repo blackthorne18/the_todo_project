@@ -167,16 +167,59 @@ function inabranch(){
     listfile $fname
 }
 
+function ready_timer(){
+    echo -e "Enter your timer message: \c"
+    read
+    message=$REPLY
+    echo "Format for entering time: 10m30s"
+    echo -e "Enter your timer time limit: \c"
+    read
+    tmlm=$REPLY
+    IFS='m' read -ra minu <<< "$tmlm"
+    IFS='s' read -ra secu <<< "${minu[1]}"
+    minu=${minu[0]}
+    #echo $minu and $secu
+    tim=$(($minu * 60 + $secu))
+    x=0
+    while [ "$x" -le "$tim" ]
+    do
+        clear
+        #tls=$(())
+        echo "-------------------------------------------------"
+        echo "Timer Ongoing"
+        echo ""
+        echo $message
+        temp=$(($tim - $x))
+        echo "You have $(($temp/60))m$(($temp%60))s time left to finish your task"
+        echo ""
+        echo "-------------------------------------------------"
+        sleep 1
+        x=$(($x + 1))
+    done
+    printf \\a
+    printf \\a
+    printf \\a
+    printf \\a
+    printf \\a
+}
+
 branches=$(getbranch 1)
 IFS=' ' read -ra branchlist <<< "$branches"
 
 if [ "$1" = "ls" ]
 then
     echo $branches
+elif [ "$1" = "timer" ]
+then
+    ready_timer
 elif [ "$1" = "help" ]
 then
     echo "Manual:
 alias todo=path+\"/main.sh\"
+
+Commands
+> todo timer
+can set a timer that runs and reminds you after set time
 > todo new <branch-name>
 creates new branch
 > todo rm <branch-name>
