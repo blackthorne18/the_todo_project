@@ -1,11 +1,13 @@
 #! /bin/bash
 
+path="/Users/prajwalbharadwaj/Desktop/shellproject/"
+
 function getbranch(){
     wo=$1
     bls=[]
     bln=0
-    fname1="branches.txt"
-    fname2="list1.txt"
+    fname1=$path"branches.txt"
+    fname2=$path"list1.txt"
     
     while read -r line
     do
@@ -29,7 +31,7 @@ function getbranch(){
 
 function switchbranch(){
     whichto=$1
-    fname1="branches.txt"
+    fname1=$path"branches.txt"
     while read -r line
     do
         IFS=' ' read -ra count <<< "$line"
@@ -55,7 +57,7 @@ function editbranches(){
     name=$2
     if [ "$key" = "0" ]
     then
-        fname1="branches.txt"
+        fname1=$path"branches.txt"
         while read -r line
         do
             bls[bln]="${line}"
@@ -66,11 +68,11 @@ function editbranches(){
         for t in ${!bls[@]}; do
             echo ${bls[$t]} >> $fname1
         done
-        touch "$2.txt"
+        touch $path"$2.txt"
         echo "New branch created: $2"
     elif [ "$key" = "1" ]
     then
-        fname1="branches.txt"
+        fname1=$path"branches.txt"
         while read -r line
         do
             bls[bln]="${line}"
@@ -90,7 +92,7 @@ function editbranches(){
                 echo ${bls[$t]} >> $fname1
             fi
         done
-        rm "$2.txt"
+        rm $path"$2.txt"
         echo "Branch removed: $2"
     fi
 }
@@ -124,8 +126,9 @@ function inabranch(){
     argnam=$2
     argpar=$3
     #echo $fname and $argnam and $argpar
-    IFS='.' read -ra ADDR <<< "$fname"
-    thisbranch="${ADDR[0]}"
+    IFS='/' read -ra ADDR <<< "$fname"
+    IFS='.' read -ra ADDR2 <<< "${ADDR[$((${#ADDR[@]}-1))]}"
+    thisbranch="${ADDR2[0]}"
     echo "Notes in $thisbranch"
     key=0
     if [ $argnam ]
@@ -143,16 +146,16 @@ function inabranch(){
     then
         if [ "$argnam" = "add" ]
         then
-            echo "[$fname notes modified: addition]"
+            echo "[$thisbranch notes modified: addition]"
             echo "$argpar" >> $fname
         elif [ "$argnam" = "del" ]
         then
             if [ "$argpar" = "all" ]
             then
-                echo "[$fname notes modified: erased]"
+                echo "[$thisbranch notes modified: erased]"
                 > $fname
             else
-                echo "[$fname notes modified: deletion]"
+                echo "[$thisbranch notes modified: deletion]"
                 > $fname
                 for t in ${!arr[@]}; do
                     if [ "$t" -ne "$argpar" ]
@@ -281,7 +284,7 @@ function main_argcheck(){
     elif [ "$1" = "" ] || [ "$1" = "add" ] || [ "$1" = "del" ]
     then
         curr=$(getbranch 0)
-        inabranch "$curr.txt" "$1" "$2"
+        inabranch $path"$curr.txt" "$1" "$2"
     fi
 }
 
