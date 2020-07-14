@@ -173,6 +173,22 @@ IFS=' ' read -ra branchlist <<< "$branches"
 if [ "$1" = "ls" ]
 then
     echo $branches
+elif [ "$1" = "help" ]
+then
+    echo "Manual:
+alias todo=path+\"/main.sh\"
+> todo new <branch-name>
+creates new branch
+> todo rm <branch-name>
+deletes an existing branch
+> todo ls
+lists all branches (1 repesents active branch)
+> todo
+lists notes in active branch
+> todo add \"notes\"
+adds notes to current branch
+> todo del <num>
+deletes notes in current branch at <num>"
 elif [ "$1" = "cd" ]
 then
     if [ "$2" = "$(getbranch 0)" ]
@@ -196,7 +212,6 @@ then
             echo $(getbranch 1)
         fi
     fi
-    
 elif [ "$1" = "new" ]
 then
     key=0
