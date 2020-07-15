@@ -15,7 +15,7 @@ lists notes and completed notes in active branch
 can set a timer that runs and reminds you after set time
 ### > todo all
 lists all notes from all branches
-### > todo wc all
+### > todo all wc
 lists all notes and completed notes from all branches
 ### > todo ls
 lists all branches (1 repesents active branch)
