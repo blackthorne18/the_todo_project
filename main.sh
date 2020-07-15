@@ -235,8 +235,7 @@ function del_done(){
     arr=()
     arn=0
     fname=$1
-    arpar=$2
-    
+    argpar=$2
     while read -r line
     do
         arr[arn]="$line"
@@ -426,7 +425,7 @@ function main_argcheck(){
         curr=$(getbranch 0)
         if [ "$2" = "del" ]
         then
-            del_done "$path$curr.txt" "$3"
+            del_done "$path"done"$curr.txt" "$3"
         fi
         
         listfile $path"$curr.txt" "2"
