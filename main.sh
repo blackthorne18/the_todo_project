@@ -26,9 +26,12 @@ function checker(){
             continue
         else
             touch $path${arr[$t]}
+            
             if [ "${arr[$t]}" = "branches.txt" ]
             then
                 echo "master 1" > $path${arr[$t]}
+            else
+                touch $path"done"${arr[$t]}
             fi
         fi
     done
@@ -135,6 +138,7 @@ function editbranches(){
             echo ${bls[$t]} >> $fname1
         done
         touch $path"$2.txt"
+        touch $path"done$2.txt"
         echo "${only_message_output}New branch created: $2${dashes}"
     elif [ "$key" = "1" ]
     then
@@ -170,12 +174,14 @@ function editbranches(){
             fi
         done
         rm $path"$2.txt"
+        rm $path"done$2.txt"
         echo "${only_message_output}Branch removed: $2${dashes}"
     fi
 }
 
 function listfile(){
     fname2=$1
+    comp=$2
     farr=()
     farn=0
     IFS='/' read -ra ADDR <<< "$fname2"
@@ -187,7 +193,7 @@ function listfile(){
     while read -r line
     do
         farr[farn]="$line"
-        farn+=1
+        farn=$(($farn + 1))
     done < $fname2
     
     for t in ${!farr[@]}; do
@@ -199,7 +205,77 @@ function listfile(){
         echo "[$thisbranch notes empty]"
     fi
     echo ""
+    
+    if [ "$comp" = "2" ]
+    then
+        echo ""
+        echo "${text_heading}Completed notes in $thisbranch${dashes}"
+        arr=()
+        arn=0
+        while read -r line
+        do
+            arr[arn]="$line"
+            arn=$(($arn + 1))
+        done < $path"done"$thisbranch".txt"
+        
+        for t in ${!arr[@]}; do
+            echo "${only_message_output}$t ${dashes}${arr[$t]}${dashes}"
+        done
+        if [ "${#arr[@]}" -eq "0" ]
+        then
+            echo "[$thisbranch completed notes empty]"
+        fi
+        echo ""
+    fi
+    
     echo "${dashes}-------------------------------------------------${dashes}"
+}
+
+function del_done(){
+    arr=()
+    arn=0
+    fname=$1
+    arpar=$2
+    
+    while read -r line
+    do
+        arr[arn]="$line"
+        arn=$(($arn + 1))
+    done < $fname
+    
+    if [ "$argpar" = "" ]
+    then
+        echo "Nothing to delete"
+    elif [ "$argpar" = "all" ]    
+    then
+        echo "${only_message_output}[$thisbranch notes modified: erased]${dashes}"
+        > $fname
+    else
+        re='^[0-9]+$'
+        if ! [[ $argpar =~ $re ]]
+        then
+           echo "${error_message}error: Not a number${dashes}" >&2; exit 1
+        else
+            > $fname
+            keys=0
+            for t in ${!arr[@]}; do
+                if [ "$t" -eq "$argpar" ]
+                then
+                    keys=1
+                fi
+                if [ "$t" -ne "$argpar" ]
+                then
+                    echo ${arr[$t]} >> $fname
+                fi
+            done
+            if [ "$keys" -eq "1" ]
+            then
+                echo "${only_message_output}[$thisbranch notes modified: deletion]${dashes}"
+            else
+                echo "${only_message_output}Nothing deleted${dashes}"
+            fi
+        fi
+    fi    
 }
 
 function inabranch(){
@@ -223,7 +299,7 @@ function inabranch(){
     while read -r line
     do
         arr[arn]="$line"
-        arn+=1
+        arn=$(($arn + 1))
     done < $fname
     
     if [ "$key" -eq "1" ]
@@ -247,12 +323,24 @@ function inabranch(){
                 then
                    echo "${error_message}error: Not a number${dashes}" >&2; exit 1
                 else
+                    echo -e "${error_message}Delete item or save to completed? [d/c] \c${dashes}"
+                    read
+                    ans=$REPLY
+                    save=0
+                    if [ "$ans" = "c" ] || [ "$ans" = "C" ]
+                    then
+                        save=1
+                    fi
                     > $fname
                     keys=0
                     for t in ${!arr[@]}; do
                         if [ "$t" -eq "$argpar" ]
                         then
                             keys=1
+                            if [ "$save" = "1" ]
+                            then
+                                echo ${arr[$t]} >> $path"done"$thisbranch".txt"
+                            fi
                         fi
                         if [ "$t" -ne "$argpar" ]
                         then
@@ -322,12 +410,26 @@ function main_argcheck(){
         do
             if [ "${#branchlist[$t]}" -ge "3" ]
             then
-                listfile $path${branchlist[$t]}.txt
+                if [ "$2" = "wc" ]
+                then
+                    listfile $path${branchlist[$t]}.txt "2"
+                else
+                    listfile $path${branchlist[$t]}.txt
+                fi
             fi
         done
     elif [ "$1" = "backup" ]
     then
         backup
+    elif [ "$1" = "wc" ]
+    then
+        curr=$(getbranch 0)
+        if [ "$2" = "del" ]
+        then
+            del_done "$path$curr.txt" "$3"
+        fi
+        
+        listfile $path"$curr.txt" "2"
     elif [ "$1" = "timer" ]
     then
         ready_timer
