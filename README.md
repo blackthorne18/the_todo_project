@@ -3,6 +3,9 @@
 Clone current directory to where you wish to store it.
 Set up alias in .bash_alias file and add todo=path_where_this_directory_is+"/main.sh".
 
+## Quick How-to
+![Alt Text](./todo_trailer.gif)
+
 ## Commands
 ### > todo
 lists notes in active branch
