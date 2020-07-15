@@ -1,8 +1,5 @@
 On start up:
-Setup the path by adding appropriate path to where the directory is saved in the first functional line of code i.e. path=""
-
-Set up alias in .bash_alias file and add todo=path+\"/main.sh\"
-All of the above will hopefully be done automatically in upcoming versions.
+Set up alias in .bash_alias file and add todo=path+"/main.sh"
 
 Commands
 > todo timer

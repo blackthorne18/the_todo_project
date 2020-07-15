@@ -1,6 +1,6 @@
 #! /bin/bash
 
-path="<insert the path where you are storing the folder>/todoproject/"
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/"
 
 if [ -d $path ]
 then
@@ -191,7 +191,7 @@ function listfile(){
     done < $fname2
     
     for t in ${!farr[@]}; do
-        echo $t ${farr[$t]}
+        echo "${only_message_output}$t${dashes} ${dashes}${farr[$t]}${dashes}"
     done
     
     if [ "${#farr[@]}" -eq "0" ]
