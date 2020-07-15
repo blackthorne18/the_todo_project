@@ -2,14 +2,18 @@ On start up:
 Set up alias in .bash_alias file and add todo=path+"/main.sh"
 
 Commands
-> todo timer
-can set a timer that runs and reminds you after set time
-> todo ls
-lists all branches (1 repesents active branch)
 > todo
 lists notes in active branch
+> todo wc
+lists notes and completed notes in active branch
+> todo timer
+can set a timer that runs and reminds you after set time
 > todo all
 lists all notes from all branches
+> todo wc all
+lists all notes and completed notes from all branches
+> todo ls
+lists all branches (1 repesents active branch)
 > todo add \"notes\"
 adds notes to current branch
 > todo del <num>
